@@ -1,0 +1,222 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description" : "Implementing a Serverless Architecture with AWS Managed Services",
+    "Resources": {
+      "InputS3BucketForChronojumpDataFiles": {
+        "Type": "AWS::S3::Bucket"
+      },
+      "AthleteDynamoDBTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+          "TableName": "Athlete",
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "AthleteID",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "AthleteID",
+              "KeyType": "HASH"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": "5",
+            "WriteCapacityUnits": "5"
+          }
+        }
+      },
+      "CountermovementJumpDynamoDBTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "DependsOn": "AthleteDynamoDBTable",
+        "Properties": {
+          "TableName": "CMJ",
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "AthleteID",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "JumpID",
+              "AttributeType": "N"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "AthleteID",
+              "KeyType": "HASH"
+            },
+            {
+              "AttributeName": "JumpID",
+              "KeyType": "RANGE"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": "5",
+            "WriteCapacityUnits": "5"
+          },
+          "StreamSpecification": {
+            "StreamViewType": "NEW_IMAGE"
+          }
+        }
+      },
+      "DepthJumpDynamoDBTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "DependsOn": "AthleteDynamoDBTable",
+        "Properties": {
+          "TableName": "DepthJump",
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "AthleteID",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "JumpID",
+              "AttributeType": "N"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "AthleteID",
+              "KeyType": "HASH"
+            },
+            {
+              "AttributeName": "JumpID",
+              "KeyType": "RANGE"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": "5",
+            "WriteCapacityUnits": "5"
+          },
+          "StreamSpecification": {
+            "StreamViewType": "NEW_IMAGE"
+          }
+        }
+      },
+      "ChronojumpProcessorRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "RoleName": "ChronojumpProcessorRole",
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "lambda.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          },
+          "ManagedPolicyArns": [
+            "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
+            "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+          ],
+          "Policies": [ {
+             "PolicyName": "CWLogsPolicy",
+             "PolicyDocument": {
+                "Version" : "2012-10-17",
+                "Statement": [
+                    {
+                      "Action": [
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": "arn:aws:logs:*:*:*",
+                      "Effect": "Allow"
+                    }
+                ]}
+             }
+           ]
+        }
+      },
+      "ChronojumpDataUploadNotifierRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "RoleName": "ChronojumpDataUploadNotifierRole",
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "lambda.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          },
+          "ManagedPolicyArns": [
+            "arn:aws:iam::aws:policy/AmazonSNSFullAccess",
+            "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+          ],
+          "Policies": [
+            {
+             "PolicyName": "CWLogsPolicy",
+             "PolicyDocument": {
+                "Version" : "2012-10-17",
+                "Statement": [
+                    {
+                      "Action": [
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": "arn:aws:logs:*:*:*",
+                      "Effect": "Allow"
+                    }
+                ]}
+             },
+             {
+              "PolicyName": "StreamsPolicy",
+              "PolicyDocument": {
+                 "Version" : "2012-10-17",
+                 "Statement": [
+                     {
+                       "Action": [
+                        "dynamodb:GetRecords",
+                        "dynamodb:GetShardIterator",
+                        "dynamodb:DescribeStream",
+                        "dynamodb:ListStreams"
+                       ],
+                       "Resource": "*",
+                       "Effect": "Allow"
+                     }
+                 ]}
+              }
+           ]
+        }
+      }
+    },
+    "Outputs": {
+      "InputS3BucketForChronojumpDataFiles": {
+        "Value": {
+          "Ref": "InputS3BucketForChronojumpDataFiles"
+        },
+        "Description": "Name of the S3 bucket in which chronojump csv file should be uploaded"
+      },
+      "AthleteDynamoDBTable": {
+        "Value": {
+          "Ref": "AthleteDynamoDBTable"
+        },
+        "Description": "Athlete table in DynamoDB"
+      },
+      "CountermovementJumpDynamoDBTable": {
+        "Value": {
+          "Ref": "CountermovementJumpDynamoDBTable"
+        },
+        "Description": "Countermovement Jumps table in DynamoDB"
+      },
+      "DepthJumpDynamoDBTable": {
+        "Value": {
+          "Ref": "DepthJumpDynamoDBTable"
+        },
+        "Description": "Depth Jumps table in DynamoDB"
+      }
+    }
+  }

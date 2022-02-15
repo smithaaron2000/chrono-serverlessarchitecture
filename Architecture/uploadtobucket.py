@@ -1,3 +1,4 @@
+from datetime import datetime
 import boto3
 from os.path import dirname
 
@@ -18,7 +19,10 @@ response = cfnclient.describe_stack_resource(
 
 resource = response['StackResourceDetail']
 bucket_name = resource['PhysicalResourceId']
-object_name = "session.csv"
+
+now = datetime.now() # current date and time
+date_time = now.strftime("%d-%m-%Y")
+object_name = 'session' + date_time + '.csv'
 
 #s3.meta.client.upload_file(f"{script_dir}session.csv", bucket_name, 'session.csv')
-s3.meta.client.upload_file("/home/aaron/Desktop/ChronojumpCSVs/session.csv", bucket_name, 'session.csv')
+s3.meta.client.upload_file("/home/aaron/Desktop/ChronojumpCSVs/session.csv", bucket_name, object_name)

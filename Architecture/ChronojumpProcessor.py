@@ -57,8 +57,8 @@ def lambda_handler(event, context):
                         'AthleteName':     row['athlete_name']})
 
                 # Insert CMJ details into Countermovement Jump DynamoDB table
-                if ((row['jump_type'] == "CMJ") | (row['jump_type'] == "Free") 
-                & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) < 80)) :
+                if ((row['jump_type'] == "CMJ") & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) < 80) 
+                | (row['jump_type'] == "Free") & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) < 80)) :
                     countermovementTable.put_item(
                         Item={
                             'AthleteID':           row['athlete_id'],

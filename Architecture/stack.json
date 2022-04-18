@@ -5,6 +5,9 @@
       "InputS3BucketForChronojumpDataFiles": {
         "Type": "AWS::S3::Bucket"
       },
+      "OutputS3BucketForAthenaData": {
+        "Type": "AWS::S3::Bucket"
+      },
       "AthleteDynamoDBTable": {
         "Type": "AWS::DynamoDB::Table",
         "Properties": {
@@ -24,6 +27,9 @@
           "ProvisionedThroughput": {
             "ReadCapacityUnits": "5",
             "WriteCapacityUnits": "5"
+          },
+          "StreamSpecification": {
+            "StreamViewType": "NEW_IMAGE"
           }
         }
       },
@@ -113,7 +119,8 @@
           },
           "ManagedPolicyArns": [
             "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
-            "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+            "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess",
+            "arn:aws:iam::aws:policy/AWSCloudFormationFullAccess"
           ],
           "Policies": [ {
              "PolicyName": "CWLogsPolicy",
@@ -130,7 +137,24 @@
                       "Effect": "Allow"
                     }
                 ]}
-             }
+             },
+             {
+              "PolicyName": "LambdaCFPolicy",
+              "PolicyDocument": {
+                 "Version" : "2012-10-17",
+                 "Statement": [
+                     {
+                       "Action": [
+                         "cloudformation:DescribeStacks",
+                         "cloudformation:DescribeStackEvents",
+                         "cloudformation:DescribeStackResource",
+                         "cloudformation:DescribeStackResources"
+                       ],
+                       "Resource": "arn:aws:cloudformation:*:*:*",
+                       "Effect": "Allow"
+                     }
+                 ]}
+              }
            ]
         }
       },
@@ -199,6 +223,12 @@
           "Ref": "InputS3BucketForChronojumpDataFiles"
         },
         "Description": "Name of the S3 bucket in which chronojump csv file should be uploaded"
+      },
+      "OutputS3BucketForAthenaData": {
+        "Value": {
+          "Ref": "OutputS3BucketForAthenaData"
+        },
+        "Description": "Name of the S3 bucket in which Athena data is exported to"
       },
       "AthleteDynamoDBTable": {
         "Value": {

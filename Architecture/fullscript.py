@@ -15,6 +15,9 @@ s3 = sess.client('s3')
 lambda_client = sess.client('lambda')
 dynamoDB = sess.client('dynamodb')
 sns = sess.client('sns')
+iam = sess.client('iam')
+athena = sess.client('athena')
+sts = boto3.client("sts")
 
 ###### Creating Cloud Formation Stack #########
 
@@ -85,6 +88,7 @@ response = cfnclient.describe_stack_resource(
 resource = response['StackResourceDetail']
 bucket_name = resource['PhysicalResourceId']
 
+
 print("Data Processor function created...")
 print(".")
 print(".")
@@ -146,6 +150,54 @@ trigger = lambda_client.create_event_source_mapping(
     BatchSize=123,
     StartingPosition='TRIM_HORIZON',
 )
+
+print("Trigger for Lambda function created...")
+print(".")
+print(".")
+print(".")
+
+## Creating Athena Workgroup
+
+account_id = sts.get_caller_identity()["Account"]
+
+response = cfnclient.describe_stack_resource(
+    StackName='ChronojumpStack',
+    LogicalResourceId='OutputS3BucketForAthenaData'
+)
+
+resource = response['StackResourceDetail']
+bucket_name = resource['PhysicalResourceId']
+s3_path = 's3://' + bucket_name + '/'
+account_id = sts.get_caller_identity()["Account"]
+
+versions = athena.list_engine_versions(
+    MaxResults=10
+)
+
+workgroup = athena.create_work_group(
+    Name='athenav2',
+    Configuration={
+        'ResultConfiguration': {
+            'OutputLocation': s3_path,
+            'EncryptionConfiguration': {
+                'EncryptionOption': 'SSE_S3'
+            }
+        },
+        'EnforceWorkGroupConfiguration': False,
+        'PublishCloudWatchMetricsEnabled': True,
+        'BytesScannedCutoffPerQuery': 10000000,
+        'RequesterPaysEnabled': False,
+        'EngineVersion': {
+            'SelectedEngineVersion': 'Athena engine version 2',
+            'EffectiveEngineVersion': 'Athena engine version 2'
+        }
+    }
+)
+
+print("Athena Workgroup Created...")
+print(".")
+print(".")
+print(".")
 
 print("Resources Created :)")
 

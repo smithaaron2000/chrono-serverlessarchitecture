@@ -6,15 +6,40 @@
 from __future__ import print_function
 from decimal import Decimal
 import json, urllib, boto3, csv, uuid
+from datetime import datetime
+
+AWS_REGION = "eu-west-1"
+
+sess = boto3.Session(region_name=AWS_REGION)
 
 # Connect to S3 and DynamoDB
-s3 = boto3.resource('s3')
-dynamodb = boto3.resource('dynamodb')
+cfnclient = sess.client('cloudformation')
+s3c = sess.client('s3')
+s3 = sess.resource('s3')
+dynamodb = sess.resource('dynamodb')
 
 # Connect to the DynamoDB tables
-athleteTable = dynamodb.Table('Athlete');
-countermovementTable = dynamodb.Table('CMJ');
-depthTable = dynamodb.Table('DepthJump');
+athleteTable = dynamodb.Table('Athlete')
+countermovementTable = dynamodb.Table('CMJ')
+depthTable = dynamodb.Table('DepthJump')
+
+now = datetime.now()
+date = now.strftime("%Y-%m-%d %H:%M:%S")
+
+response = cfnclient.describe_stack_resource(
+    StackName='ChronojumpStack',
+    LogicalResourceId='InputS3BucketForChronojumpDataFiles'
+)
+
+resource = response['StackResourceDetail']
+bucket_name = resource['PhysicalResourceId']
+
+get_last_modified = lambda obj: int(obj['LastModified'].strftime('%s'))
+objs = s3c.list_objects_v2(Bucket=bucket_name)['Contents']
+last_added = [obj for obj in sorted(objs, key=get_last_modified)]
+name = last_added[-1]['Key']
+
+localFilename = '/tmp/' + name
 
 # This handler is executed every time the Lambda function is triggered
 def lambda_handler(event, context):
@@ -25,7 +50,7 @@ def lambda_handler(event, context):
     # Get the bucket and object key from the Event
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
-    localFilename = '/tmp/session.csv'
+
 
     # Download the file from S3 to the local filesystem
     try:
@@ -63,23 +88,25 @@ def lambda_handler(event, context):
                         Item={
                             'AthleteID':           row['athlete_id'],
                             'AthleteName':         row['athlete_name'],
-                            'DateTime':            row['date_time'],
+                            'DateTime':            row['date_time'].replace(" ", "_"),
                             'JumpType':            row['jump_type'],
                             'JumpID':              (uuid.uuid1().int>>64),
                             'Height':              Decimal(str(row['jump_height']))})
-                elif ((row['jump_type'] == "RJ(j)") 
-                & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) < 80)) :
+                elif ((row['jump_type'] == "RJ(j)")
+                & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) <= 80) 
+                & (Decimal(str(row['jump_RSI'])) >= 1.2)) :
+                 
                     # Insert Depth Jump details into Depth Jump DynamoDB table
                     depthTable.put_item(
                         Item={
                             'AthleteID':            row['athlete_id'],
                             'AthleteName':          row['athlete_name'],
-                            'DateTime':             row['date_time'],
+                            'DateTime':             row['date_time'].replace(" ", "_"),
                             'JumpType':             row['jump_type'],
                             'JumpID':               (uuid.uuid1().int>>64),
-                            'ContactTime':          row['jump_tc'],
+                            'ContactTime':          Decimal(str(row['jump_tc'])),
                             'Height':               Decimal(str(row['jump_height'])),
-                            'RSI':                  row['jump_RSI']})
+                            'RSI':                  Decimal(str(row['jump_RSI']))})
                 
                     
             except Exception as e:

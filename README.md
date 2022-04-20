@@ -76,3 +76,15 @@ Next, configure the data source.
 Select "Save and Test". If the configuration is set up correctly, you wull see the following output:
 
 ![image](https://user-images.githubusercontent.com/43610720/164310614-813ed8c9-a82f-41ef-be3f-1ff4a1552cf2.png)
+
+# 6. Creating the Dashboard
+* On the left sidebar, hover over the + sign and select "Import".
+* Upload the chronojump-grafana.json file. 
+* NOTE: replace any instance of $INSERT_NAME_HERE with the name of an athlete in your database (For Individual Progression Charts).
+
+If configuration is successful, the dashboard will be available, looking like this:
+
+![image](https://user-images.githubusercontent.com/43610720/164314848-06a07708-9e25-4a62-ac74-ab27f5983cf7.png)
+
+
+

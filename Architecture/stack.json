@@ -14,13 +14,13 @@
           "TableName": "Athlete",
           "AttributeDefinitions": [
             {
-              "AttributeName": "AthleteID",
+              "AttributeName": "AthleteName",
               "AttributeType": "S"
             }
           ],
           "KeySchema": [
             {
-              "AttributeName": "AthleteID",
+              "AttributeName": "AthleteName",
               "KeyType": "HASH"
             }
           ],
@@ -40,7 +40,7 @@
           "TableName": "CMJ",
           "AttributeDefinitions": [
             {
-              "AttributeName": "AthleteID",
+              "AttributeName": "AthleteName",
               "AttributeType": "S"
             },
             {
@@ -50,7 +50,7 @@
           ],
           "KeySchema": [
             {
-              "AttributeName": "AthleteID",
+              "AttributeName": "AthleteName",
               "KeyType": "HASH"
             },
             {
@@ -74,7 +74,7 @@
           "TableName": "DepthJump",
           "AttributeDefinitions": [
             {
-              "AttributeName": "AthleteID",
+              "AttributeName": "AthleteName",
               "AttributeType": "S"
             },
             {
@@ -84,7 +84,7 @@
           ],
           "KeySchema": [
             {
-              "AttributeName": "AthleteID",
+              "AttributeName": "AthleteName",
               "KeyType": "HASH"
             },
             {

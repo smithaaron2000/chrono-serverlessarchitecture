@@ -70,15 +70,21 @@ def lambda_handler(event, context):
             rowCount += 1
 
             # Show the row in the debug log
-            print(row['athlete_id'], row['athlete_name'], row['date_time'],
+            print(row['athlete_name'], row['date_time'],
             row['jump_type'], row['jump_tc'], row['jump_height'], row['jump_RSI'])
             print(rowCount)
+
+            newDt = row['date_time'].replace("_", " ")
+            date, time = newDt.split(" ")
+            newTime = time.replace("-", ":")
+            datetime = [date, newTime]
+            glue = ' '
+            d = glue.join(datetime)
             
             try:
                 # Insert Athlete ID and Name into Athlete DynamoDB table
                 athleteTable.put_item(
                     Item={
-                        'AthleteID':       row['athlete_id'],
                         'AthleteName':     row['athlete_name']})
 
                 # Insert CMJ details into Countermovement Jump DynamoDB table
@@ -86,22 +92,22 @@ def lambda_handler(event, context):
                 | (row['jump_type'] == "Free") & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) < 80)) :
                     countermovementTable.put_item(
                         Item={
-                            'AthleteID':           row['athlete_id'],
                             'AthleteName':         row['athlete_name'],
-                            'DateTime':            row['date_time'].replace(" ", "_"),
+                            'Date':                date,
+                            'DateTime':            d,
                             'JumpType':            row['jump_type'],
                             'JumpID':              (uuid.uuid1().int>>64),
                             'Height':              Decimal(str(row['jump_height']))})
                 elif ((row['jump_type'] == "RJ(j)")
-                & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) <= 80) 
-                & (Decimal(str(row['jump_RSI'])) >= 1.2)) :
+                    & (Decimal(str(row['jump_height'])) >= 30) & (Decimal(str(row['jump_height'])) <= 80) 
+                    & (Decimal(str(row['jump_RSI'])) >= 1.2)) :
                  
                     # Insert Depth Jump details into Depth Jump DynamoDB table
                     depthTable.put_item(
                         Item={
-                            'AthleteID':            row['athlete_id'],
                             'AthleteName':          row['athlete_name'],
-                            'DateTime':             row['date_time'].replace(" ", "_"),
+                            'Date':                 date,
+                            'DateTime':             d,
                             'JumpType':             row['jump_type'],
                             'JumpID':               (uuid.uuid1().int>>64),
                             'ContactTime':          Decimal(str(row['jump_tc'])),

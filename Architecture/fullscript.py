@@ -53,7 +53,8 @@ topic = sns.create_topic(Name="ChronojumpDataUploadedSNSTopic")
 topic_arn = topic["TopicArn"]
 
 #Create Email Subscription
-subsribe = sns.subscribe(TopicArn=topic_arn, Protocol="email", Endpoint="smithaaron2000@gmail.com", ReturnSubscriptionArn=True)
+email_endpoint = "INSERT_EMAIL_ADDRESS_HERE"
+subsribe = sns.subscribe(TopicArn=topic_arn, Protocol="email", Endpoint=email_endpoint, ReturnSubscriptionArn=True)
 subscription_arn = subsribe["SubscriptionArn"]
 
 print("SNS Topic Created...")

@@ -2,6 +2,7 @@
 
 * Chronojump-AWS from https://github.com/smithaaron2000/chronojump-aws
 * AWS Account with AWS Configuration complete on your machine (https://aws.amazon.com/account/)
+* Configure AWS-CLI (https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
 * Python3 (https://docs.python-guide.org/starting/install3/linux/)
 * Grafana Account (https://grafana.com)
 

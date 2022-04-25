@@ -1,4 +1,5 @@
 FROM python:3
-COPY fullscript.py ./
+COPY ["fullscript.py", "stack.json", "ChronojumpProcessor.zip", "ChronojumpDataUploadNotifier.zip", "./"]
 RUN pip install boto3
-CMD python fullscript.py
+RUN pip install awscli
+CMD python3 fullscript.py

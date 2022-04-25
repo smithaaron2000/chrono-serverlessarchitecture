@@ -8,7 +8,9 @@ AWS_REGION = "eu-west-1"
 
 script_dir = dirname(__file__)
 
-sess = boto3.Session(region_name=AWS_REGION)
+#sess = boto3.Session(region_name=AWS_REGION)
+sess = boto3.Session(profile_name='default')
+
 
 cfnclient = sess.client('cloudformation')
 s3 = sess.client('s3')

@@ -87,5 +87,15 @@ If configuration is successful, the dashboard will be available, looking like th
 
 ![image](https://user-images.githubusercontent.com/43610720/164314848-06a07708-9e25-4a62-ac74-ab27f5983cf7.png)
 
+# 7 . Uploading to the Serverless Architecture
+
+* In your Desktop, create a folder called "ChronojumpCSVs". This is the folder where the CSV files are uploaded from.
+* In Chronojump after completing and saving a session, navigate to the settings button.
+![image](https://user-images.githubusercontent.com/43610720/165109017-33604cce-9692-4186-8022-32e19dd68a69.png)
+* Click on "More", and choose "Export to CSV".
+![image](https://user-images.githubusercontent.com/43610720/165109120-41edeb53-705c-4eca-a4c8-15d9208262e0.png)
+Select the "Chronojump CSVs" folder, and press export.
+
+
 
 

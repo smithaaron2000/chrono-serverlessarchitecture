@@ -18,6 +18,17 @@ Or if you have an SSH Key:
 git clone git@github.com:smithaaron2000/chrono-serverlessarchitecture.git
 ```
 
+Alternatively, you could pull the image from DockerHub using the command:
+
+```
+podman pull docker.io/smithaaron2000/chrono-serverless-architecture
+```
+Or
+
+```
+docker pull docker.io/smithaaron2000/chrono-serverless-architecture
+```
+
 # 3. Creating an Amazon Athena Datasource
 
 When asked to choose a datasource, select DynamoDB, and then select "Next".
@@ -42,6 +53,16 @@ The Architecture is created by running the following command:
 ```
 python3 fullscript.py
 ```
+
+Alternatively, if you pulled the image from DockerHub, run:
+```
+podman run -v ~/.aws:/root/.aws docker.io/smithaaron2000/chrono-serverless-architecture
+```
+Or
+```
+docker run -v ~/.aws:/root/.aws docker.io/smithaaron2000/chrono-serverless-architecture
+```
+Ensure that you have a config file in your ~/.aws/ folder, with your AWS region, your Access Key ID and your Secret Access Key in the config file.
 
 This will create the following resources in AWS:
 * S3 Bucket

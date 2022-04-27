@@ -6,6 +6,10 @@
 * Python3 (https://docs.python-guide.org/starting/install3/linux/)
 * Grafana Account (https://grafana.com)
 
+Alternative (Not Required)
+* Podman installed (https://podman.io/getting-started/installation)
+* Docker installed (https://www.docker.com/?utm_source=google&utm_medium=cpc&utm_campaign=search_emea_brand&utm_term=install_docker_exact&gclid=Cj0KCQjw06OTBhC_ARIsAAU1yOWdmiqTw5krqphLiOGA39yJOBnzd8tcG_nbj0ejqVkvNBObr_qIPq8aAnp5EALw_wcB)
+
 # 2. Installing
 
 Clone the project using the command:

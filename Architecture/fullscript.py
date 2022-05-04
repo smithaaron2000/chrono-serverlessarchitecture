@@ -65,10 +65,11 @@ print(".")
 print(".")
 
 ###### Creating Lambda function to process CSV file ######
-
+account_id=sts.get_caller_identity().get('Account')
+processor_role = "arn:aws:iam::" + account_id + ":role/ChronojumpProcessorRole"
 processor_function = lambda_client.create_function(FunctionName="ChronojumpProcessor", Runtime="python3.9", 
                                                 Handler="ChronojumpProcessor.lambda_handler",
-                                                Role="arn:aws:iam::846950971618:role/ChronojumpProcessorRole",
+                                                Role=processor_role,
                                                 Code={'ZipFile': open(f"{script_dir}ChronojumpProcessor.zip", 'rb').read()}, Timeout = 120)
 
 
@@ -112,10 +113,12 @@ trigger = s3.put_bucket_notification_configuration(Bucket=bucket_name,
         ]})
 
 ########### Creating Lambda function to notify subscribers ###############
+account_id=sts.get_caller_identity().get('Account')
+notifier_role = "arn:aws:iam::" + account_id + ":role/ChronojumpDataUploadNotifier"
 
 notifier_function = lambda_client.create_function(FunctionName="ChronojumpDataUploadNotifier", Runtime="python3.9", 
                                                 Handler="ChronojumpDataUploadNotifier.lambda_handler",
-                                                Role="arn:aws:iam::846950971618:role/ChronojumpDataUploadNotifierRole",
+                                                Role=notifier_role,
                                                 Code={'ZipFile': open(f"{script_dir}ChronojumpDataUploadNotifier.zip", 'rb').read()})
 
 get_function = lambda_client.get_function_configuration(FunctionName="ChronojumpDataUploadNotifier")
